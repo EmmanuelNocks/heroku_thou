@@ -1,1 +1,1 @@
-web: vendor/bin/heroku-php-apache2 test-nocks/
+web: vendor/bin/heroku-php-apache2 
