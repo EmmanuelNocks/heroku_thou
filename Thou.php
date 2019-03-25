@@ -31,6 +31,7 @@ class Thou{
 
     public function post(){
         global $config;
+
         if(isset($_POST["pardotid"]) && isset($_POST["email"])){
 
             $pID = $_POST["pardotid"];
@@ -40,11 +41,11 @@ class Thou{
        
 
 
-    //    $person = $this->discover->searchPersonByEmail($email);
-    //    $company =  $this->discover->searchCompanyByDomain(array($domain[1]));
-       if(false){
+       $person = $this->discover->searchPersonByEmail($email);
+       $company =  $this->discover->searchCompanyByDomain(array($domain[1]));
+       if(count($person)>0 && count($company)>0){
 
-            $this->pardot->runUpdate($pID);
+        $this->discoverCallback($pID,$company[0],$person[0],true);
            
        }
        else{
@@ -54,7 +55,7 @@ class Thou{
 
             if(!isset($person->error)&&!isset($company->error)){
             
-                $this->callback($pID,$company,$person,true);
+                $this->clearbitCallback($pID,$company,$person,true);
             }
             else{
               
@@ -63,10 +64,10 @@ class Thou{
                 $company =  $this->clearbit->searchCompanyByDomain($domain[1]); 
 
                 if(!isset($person->error)&&!isset($company->error)){
-                    $this->callback($pID,$company,$person,true);
+                    $this->clearbitCallback($pID,$company,$person,true);
                 }
                 else{
-                    $this->callback($pID,$company,$person,false);
+                    $this->clearbitCallback($pID,$company,$person,false);
                 }
 
             }
@@ -78,7 +79,7 @@ class Thou{
     }
 }
 
-public function callback($pID,$company,$person,$found){
+public function clearbitCallback($pID,$company,$person,$found){
     global $config;
 
     if($found){
@@ -124,6 +125,58 @@ else{
 }
 }
 
+//__________________________________________________________________________________________________________
+public function discoverCallback($pID,$company,$person,$found){
+    global $config;
+
+    if($found){
+
+    $data = array(
+        'Data_Enrichment_Complete'=>true,
+        'DO_Account_Address'=>$company->location->streetAddress1,
+        'DO_Account_City'=>$company->location->city,
+        'DO_Account_Country'=>$company->location->countryName,
+        'DO_Employees__c_lead'=>'',
+        'DO_Industry'=>$company->industry,
+        'DO_Company'=>$company->name,
+        'DO_Account_Phone'=>$company->mainPhoneNumber,
+        'DO_Revenue'=>$company->revenue,
+        'DO_Account_State'=>$company->location->stateProvinceRegion,
+        'DO_Website'=>$company->websiteUrl,
+        'DO_Account_Zip_Code'=>$person->location->postalCode,
+        'DO_Address'=>$person->location->streetAddress1,
+        'DSCORGPKG_DiscoverOrg_ID'=>$person->id,
+        'DO_MobilePhone'=>$person->officeTelNumber,
+        'DO_Phone'=>$company->mainPhoneNumber,
+        'DO_State'=>$person->location->stateProvinceRegion,
+        'DO_Title'=>$person->title,
+        'DO_City' =>$person->location->city,
+        'DO_Country' => $person->location->countryName
+    );
+
+    $results= $this->pardot->runUpdate($pID,$data);
+
+    if($results['code']==200){
+        echo 'Successful';
+    }
+}
+else{
+
+    $data = array(
+        'Data_Enrichment_Complete'=>true,
+        'api_key' =>$this->pardot->getApiKey(),
+        'user_key' => $config["pardot"]["user_key"],
+        'format'=>'json'
+    );
+
+    $results= $this->pardot->runUpdate($pID,$data);
+
+    if($results['code']==200){
+        echo 'Successful, but data not found';
+    }
+}
+}
+
 public function getProspects($t1,$t2){
     global $config;
     $data = array(
@@ -142,5 +195,4 @@ public function getProspects($t1,$t2){
 
 
 $instance = new Thou();
-
 $instance->post();

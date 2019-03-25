@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . '/config.php';
+// require __DIR__ . '/config.php';
 class Discover{
 
     private $token;
@@ -37,7 +37,6 @@ class Discover{
 
     public function searchPersonByEmail($emails){
         global $config;
-        
         $ch =  curl_init($config['discover']['baseEndpoint'].'v1/search/persons');
         $data_string='{"personCriteria":{"emails":'.$this->arrayToString($emails).'}}';
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");                                                                     
@@ -47,21 +46,20 @@ class Discover{
      
         $response = json_decode(curl_exec($ch),false);
         curl_close($ch);
-        return $response;
+        return $response->content;
     }
     public function searchCompanyByDomain($emails){
         global $config;
         
-        $ch =  curl_init($config['discover']['baseEndpoint'].'v1/search/persons');
+        $ch =  curl_init($config['discover']['baseEndpoint'].'v1/search/companies');
         $data_string='{"companyCriteria":{"emailDomains":'.$this->arrayToString($emails).'}}';
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");                                                                     
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
 		curl_setopt($ch,  CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array('accept: application/json','Content-Type: application/json','X-AUTH-TOKEN:'.trim($this->getToken()),'X-PARTNER-KEY: '. $config["discover"]["partnerKey"]));
-     
         $response = json_decode(curl_exec($ch),false);
         curl_close($ch);
-        return $response;
+        return $response->content;
     }
 
     public function arrayToString($array){
@@ -72,4 +70,4 @@ class Discover{
 }
 
 // $instance = new Discover();
-// $instance->searchCompanyByDomain(array('canpango.com'));
+// $instance->searchCompanyByDomain(array('canpango.com'))->content;
