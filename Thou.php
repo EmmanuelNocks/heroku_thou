@@ -1,7 +1,6 @@
 <?php
 
 require_once dirname(__FILE__).'/config.php';
-require_once dirname(__FILE__).'/systemlog/vendor/apache/log4php/src/main/php/Logger.php';
 require_once dirname(__FILE__).'/Clearbit.php';
 require_once dirname(__FILE__).'/Pardot.php';
 require_once dirname(__FILE__).'/Discover.php';
@@ -42,9 +41,9 @@ class Thou{
        
 
 
-       $person = $this->discover->searchPersonByEmail($email);
-       $company =  $this->discover->searchCompanyByDomain(array($domain[1]));
-       if($res){
+    //    $person = $this->discover->searchPersonByEmail($email);
+    //    $company =  $this->discover->searchCompanyByDomain(array($domain[1]));
+       if(false){
 
             $this->pardot->runUpdate($pID);
            
