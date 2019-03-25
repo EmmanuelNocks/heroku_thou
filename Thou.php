@@ -21,7 +21,6 @@ class Thou{
                 $this->clearbit = new Clearbit();
                 $this->pardot = new Pardot();
                 $this->discover = new Discover();
-                $this->log->info("start time=>".date("Y-m-d h:i:sa"));
             }
             catch(Exception $ex){
                 
