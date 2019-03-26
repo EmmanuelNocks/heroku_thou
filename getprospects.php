@@ -5,8 +5,21 @@ set_time_limit(0);
 require_once dirname(__FILE__).'/Thou.php';
 require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPStreamConnection;
+$app = new Silex\Application();
 $rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
-$connection = new AMQPStreamConnection($rabbitmq['host'], 1883 , $rabbitmq['user'], $rabbitmq['pass']);
+$app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
+    'amqp.connections' => [
+        'default' => [
+            'host'     => $rabbitmq['host'],
+            'port'     => isset($rabbitmq['port']) ? $rabbitmq['port'] : 5672,
+            'username' => $rabbitmq['user'],
+            'password' => $rabbitmq['pass'],
+            'vhost'    => substr($rabbitmq['path'], 1) ?: '/',
+        ],
+    ],
+]);
+        $connection = $app['amqp']['default'];
+        $channel = $connection->channel();
 // $connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
 $channel = $connection->channel();
 $channel->queue_declare('task_queue', false, true, false, false);
