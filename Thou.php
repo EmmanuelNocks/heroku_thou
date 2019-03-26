@@ -8,7 +8,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 date_default_timezone_set("America/New_York");
-
+$app = new Silex\Application();
 class Thou{
 
    public $log;
@@ -290,7 +290,7 @@ public function createProspects(){
 // $instance->post();
 
 // RabbitMQ connection
-$rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
+//$rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
 // $app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
 //     'amqp.connections' => [
 //         'default' => [
@@ -303,8 +303,21 @@ $rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
 //     ],
 // ]);
 try{
-$connection = new AMQPStreamConnection($rabbitmq['host'], 5672 , $rabbitmq['user'].':'.$rabbitmq['user'], $rabbitmq['pass']);
-$channel = $connection->channel();
+    $rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
+    $app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
+        'amqp.connections' => [
+            'default' => [
+                'host'     => $rabbitmq['host'],
+                'port'     => isset($rabbitmq['port']) ? $rabbitmq['port'] : 5672,
+                'username' => $rabbitmq['user'],
+                'password' => $rabbitmq['pass'],
+                'vhost'    => substr($rabbitmq['path'], 1) ?: '/',
+            ],
+        ],
+    ]);
+            $connection = $app['amqp']['default'];
+            $channel = $connection->channel();
+
 $channel->queue_declare('hello', false, false, false, false);
 $msg = new AMQPMessage('Hello World!');
 $channel->basic_publish($msg, '', 'hello');
