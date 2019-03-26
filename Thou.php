@@ -302,7 +302,7 @@ $rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
 //         ],
 //     ],
 // ]);
-
+try{
 $connection = new AMQPStreamConnection($rabbitmq['host'], 1883 , $rabbitmq['user'].':'.$rabbitmq['user'], $rabbitmq['pass']);
 $channel = $connection->channel();
 $channel->queue_declare('hello', false, false, false, false);
@@ -311,4 +311,9 @@ $channel->basic_publish($msg, '', 'hello');
 echo " [x] Sent 'Hello World!'\n";
 $channel->close();
 $connection->close();
+}
+catch(Exeption $e){
+
+    print_r($e);
+}
 ?>
