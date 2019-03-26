@@ -302,6 +302,7 @@ $rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
 //         ],
 //     ],
 // ]);
+print_r($rabbitmq);
 $connection = new AMQPStreamConnection($rabbitmq['host'], isset($rabbitmq['port']) ? $rabbitmq['port'] : 5672, $rabbitmq['user'], $rabbitmq['pass']);
 $channel = $connection->channel();
 $channel->queue_declare('hello', false, false, false, false);
