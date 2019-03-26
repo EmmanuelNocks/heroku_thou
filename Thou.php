@@ -320,7 +320,7 @@ try{
 
 $channel->queue_declare('task_queue', false, true, false, false);
 $msg = new AMQPMessage('Hello World!');
-$channel->basic_publish($msg, '', 'hello');
+$channel->basic_publish($msg, '', 'task_queue');
 echo " [x] Sent 'Hello World!'\n";
 $channel->close();
 $connection->close();
