@@ -26,7 +26,6 @@ class Pardot{
         } else {
             $url = $url . '?' . $queryString;
         }
-    
         $curl_handle = curl_init($url);
     
         // wait 5 seconds to connect to the Pardot API, and 30
@@ -90,7 +89,12 @@ class Pardot{
         global $config;
         return $this->ApiCall($config["pardot"]["baseEndpoint"].'prospect/version/4/do/query',$data,'GET');
       }
+      public function create($data){
+        global $config;
+        return $this->ApiCall($config["pardot"]["baseEndpoint"].'prospect/version/4/do/create/email/nocksTest@pardot.com?',$data,'GET');
+      }
 }
+
 // $pardot = new Pardot();
 // $data = array(
   

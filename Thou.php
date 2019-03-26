@@ -4,8 +4,7 @@ require_once dirname(__FILE__).'/config.php';
 require_once dirname(__FILE__).'/Clearbit.php';
 require_once dirname(__FILE__).'/Pardot.php';
 require_once dirname(__FILE__).'/Discover.php';
-// Logger::configure(dirname(__FILE__).'/systemlog/syslog2.xml');
-date_default_timezone_set("Africa/Johannesburg");
+date_default_timezone_set("America/New_York");
 class Thou{
 
    public $log;
@@ -15,7 +14,7 @@ class Thou{
 
     function __construct(){
 
-            // $this->log = Logger::getRootLogger(); //track logs
+   
             try{
 
                 $this->clearbit = new Clearbit();
@@ -29,15 +28,69 @@ class Thou{
 
     }
 
+    public function lookUpProspect($pID,$email){
+
+        $email = array($email);
+        $plainEmail = $email;
+        $domain = explode('@',$plainEmail);
+
+        $person = $this->discover->searchPersonByEmail($email);
+        $company =  $this->discover->searchCompanyByDomain(array($domain[1]));
+
+        if(count($person)>0 && count($company)>0){
+ 
+         $this->discoverCallback($pID,$company[0],$person[0],true);
+            
+        }
+        else{
+ 
+             $person =  $this->clearbit->searchPersonByEmail($plainEmail);
+             $company =  $this->clearbit->searchCompanyByDomain($domain[1]); 
+ 
+             if(!isset($person->error)&&!isset($company->error)){
+             
+                 $this->clearbitCallback($pID,$company,$person,true);
+             }
+             else{
+               
+                 sleep(5); //retry
+                 $person =  $this->clearbit->searchPersonByEmail($plainEmail);
+                 $company =  $this->clearbit->searchCompanyByDomain($domain[1]); 
+ 
+                 if(!isset($person->error)&&!isset($company->error)){
+                     $this->clearbitCallback($pID,$company,$person,true);
+                 }
+                 else{
+                     $this->clearbitCallback($pID,$company,$person,false);
+                 }
+ 
+             }
+ 
+ 
+        } 
+    }
+
+
     public function post(){
         global $config;
+       
+        if((isset($_POST["pardotid"]) && isset($_POST["email"]))||(isset($_GET["pardotid"]) && isset($_GET["email"]))){
+        
+            if(isset($_GET["pardotid"]) && isset($_GET["email"])){
+                
+                $pID = $_GET["pardotid"];
+                $email = array($_GET["email"]);
+                $plainEmail = $_GET["email"];
+                $domain = explode('@',$plainEmail);
+            }
+            else{
 
-        if(isset($_POST["pardotid"]) && isset($_POST["email"])){
+                $pID = $_POST["pardotid"];
+                $email = array($_POST["email"]);
+                $plainEmail = $_POST["email"];
+                $domain = explode('@',$plainEmail);
+            }
 
-            $pID = $_POST["pardotid"];
-            $email = array($_POST["email"]);
-            $plainEmail = $_POST["email"];
-            $domain = explode('@',$plainEmail);
        
 
 
@@ -184,13 +237,48 @@ public function getProspects($t1,$t2){
         'created_before'=>$t2,
         'api_key' =>$this->pardot->getApiKey(),
         'user_key' => $config["pardot"]["user_key"],
-        'format'=>'json'
+        'sort_by'=>'created_at',
+        'sort_order'=>'ascending',
+        'format'=>'json',
+        'limit'=>'200'
     );
-    $results= $this->pardot->queryByDateTime($data);
+ 
+    $results = $this->pardot->queryByDateTime($data)['res'];
+    $toatresults = $results->result->prospect;
 
-    print_r( $data);
+    while($results->result->total_results==200 && $results->result->total_results!=1){
+
+        $data = array(
+            'created_after'=>$results->result->prospect[$results->result->total_results-1]->created_at,
+            'created_before'=>$t2,
+            'api_key' =>$this->pardot->getApiKey(),
+            'user_key' => $config["pardot"]["user_key"],
+            'format'=>'json'
+        );
+        
+        $results = $this->pardot->queryByDateTime($data)['res'];
+       
+        if($results->result->total_results>0){
+            $toatresults = array_merge($toatresults,$results->result->prospect);
+        }
+    }
+    
+   return $toatresults;
 }
 
+//Testing
+public function createProspects(){
+    global $config;
+    $data = array(
+        'first_name'=>'Nocks',
+        'last_name'=>'test',
+        'api_key' =>$this->pardot->getApiKey(),
+        'user_key' => $config["pardot"]["user_key"]
+    );
+   
+    $results= $this->pardot->create($data)['res'];
+    print_r($data);
+}
 }
 
 
