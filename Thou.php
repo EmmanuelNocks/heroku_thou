@@ -1,10 +1,14 @@
 <?php
-
+require_once __DIR__.'/vendor/autoload.php';
 require_once dirname(__FILE__).'/config.php';
 require_once dirname(__FILE__).'/Clearbit.php';
 require_once dirname(__FILE__).'/Pardot.php';
 require_once dirname(__FILE__).'/Discover.php';
+require_once __DIR__ . '/vendor/autoload.php';
+use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Message\AMQPMessage;
 date_default_timezone_set("America/New_York");
+
 class Thou{
 
    public $log;
@@ -282,5 +286,28 @@ public function createProspects(){
 }
 
 
-$instance = new Thou();
-$instance->post();
+// $instance = new Thou();
+// $instance->post();
+
+// RabbitMQ connection
+$rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
+// $app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
+//     'amqp.connections' => [
+//         'default' => [
+//             'host'     => $rabbitmq['host'],
+//             'port'     => isset($rabbitmq['port']) ? $rabbitmq['port'] : 5672,
+//             'username' => $rabbitmq['user'],
+//             'password' => $rabbitmq['pass'],
+//             'vhost'    => substr($rabbitmq['path'], 1) ?: '/',
+//         ],
+//     ],
+// ]);
+$connection = new AMQPStreamConnection($rabbitmq['host'], isset($rabbitmq['port']) ? $rabbitmq['port'] : 5672, $rabbitmq['user'], $rabbitmq['pass']);
+$channel = $connection->channel();
+$channel->queue_declare('hello', false, false, false, false);
+$msg = new AMQPMessage('Hello World!');
+$channel->basic_publish($msg, '', 'hello');
+echo " [x] Sent 'Hello World!'\n";
+$channel->close();
+$connection->close();
+?>
