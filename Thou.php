@@ -318,7 +318,7 @@ try{
             $connection = $app['amqp']['default'];
             $channel = $connection->channel();
 
-$channel->queue_declare('task_queue', false, false, false, false);
+$channel->queue_declare('task_queue', false, true, false, false);
 $msg = new AMQPMessage('Hello World!');
 $channel->basic_publish($msg, '', 'hello');
 echo " [x] Sent 'Hello World!'\n";
