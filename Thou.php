@@ -303,7 +303,7 @@ $rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
 //     ],
 // ]);
 try{
-$connection = new AMQPStreamConnection($rabbitmq['host'], 1883 , $rabbitmq['user'].':'.$rabbitmq['user'], $rabbitmq['pass']);
+$connection = new AMQPStreamConnection($rabbitmq['host'], 5672 , $rabbitmq['user'].':'.$rabbitmq['user'], $rabbitmq['pass']);
 $channel = $connection->channel();
 $channel->queue_declare('hello', false, false, false, false);
 $msg = new AMQPMessage('Hello World!');
