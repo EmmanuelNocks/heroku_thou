@@ -27,6 +27,8 @@ echo " [*] Waiting for messages. To exit press CTRL+C\n";
 $callback = function ($msg) {
     echo " received\n";
    echo $msg->body;
+   $postdata = explode(";",$msg->body);
+   echo $postdata[1];
 //    $postdata =  json_decode($msg->body,false);
 //     print($postdata);
 // $instance = new Thou();

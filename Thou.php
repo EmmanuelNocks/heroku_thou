@@ -317,12 +317,11 @@ try{
     ]);
     if(isset($_POST["pardotid"]) && isset($_POST["email"])){
 
-        $postData = "{'id':'".$_POST["pardotid"]."','email':'".$_POST["email"]."'}";
         $connection = $app['amqp']['default'];
         $channel = $connection->channel();
 
         $channel->queue_declare('post_queue', false, true, false, false);
-        $msg = new AMQPMessage($postData);
+        $msg = new AMQPMessage($_POST["pardotid"].";".$_POST["email"]);
         $channel->basic_publish($msg, '', 'post_queue');
         echo " [x] Sent'\n";
         $channel->close();
