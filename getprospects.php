@@ -12,20 +12,13 @@ $app->register(new Predis\Silex\ClientServiceProvider(), [
 ]);
 
 try{
-    $T2 = date("Y-m-d h:i:s");
-    $T1 = date('Y-m-d H:i:s',strtotime('-10 minutes',strtotime($T2)));
-    $datetime1 =  explode(" ",$T1);
-    $date1 = implode("",explode("-",$datetime1[0]));
-    $time1 = implode("",explode(":",$datetime1[1]));
-    $datetime1 =$datetime1[0]."T".$datetime1[1];
-
+ 
     $datetime2 =  explode(" ",$T2);
     $date2 = implode("",explode("-",$datetime2[0]));
     $time2 = implode("",explode(":",$datetime2[1]));
     $datetime2 =$datetime2[0]."T".$datetime2[1];
-    echo $app['predis']->get('created_before');
+    $datetime1 = $app['predis']->get('created_before');
     $app['predis']->set('created_before',$datetime2);
-    echo $app['predis']->get('created_before');
     $rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
     $app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
         'amqp.connections' => [
@@ -56,22 +49,3 @@ catch(Exeption $e){
 
     print_r($e);
 }
-// $T2 = date("Y-m-d h:i:s");
-// $T1 = date('Y-m-d H:i:s',strtotime('-10 minutes',strtotime($T2)));
-// $datetime1 =  explode(" ",$T1);
-// $date1 = implode("",explode("-",$datetime1[0]));
-// $time1 = implode("",explode(":",$datetime1[1]));
-// $datetime1 =$datetime1[0]."T".$datetime1[1];
-
-// $datetime2 =  explode(" ",$T2);
-// $date2 = implode("",explode("-",$datetime2[0]));
-// $time2 = implode("",explode(":",$datetime2[1]));
-// $datetime2 =$datetime2[0]."T".$datetime2[1];
-
-// $instance = new Thou();
-// $data = $instance->getProspects($datetime1,$datetime2);
-
-
-// foreach ($data as $key => $value) {
-//     $instance-> lookUpProspect($value->id, $value->email);
-// }

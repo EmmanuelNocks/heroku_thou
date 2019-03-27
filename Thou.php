@@ -83,7 +83,7 @@ class Thou{
             
                 $pID = $data[0];
                 $email = array($data[1]);
-                $plainEmail = $data[0];
+                $plainEmail = $data[1];
                 $domain = explode('@',$plainEmail);
             
 
