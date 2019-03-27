@@ -25,7 +25,8 @@ $app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
 $channel->queue_declare('post_queue', false, true, false, false);
 echo " [*] Waiting for messages. To exit press CTRL+C\n";
 $callback = function ($msg) {
-    print_r($msg->body);
+    echo 'ye';
+    echo $msg['body'];
 //    $postdata =  json_decode($msg,false);
 // print_r($postdata);
 // $instance = new Thou();
