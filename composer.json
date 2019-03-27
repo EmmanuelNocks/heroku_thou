@@ -1,7 +1,8 @@
 {
     "require": {
         "silex/silex": "^1.3",
-        "ebichan/silex-amqp-provider": "^1.0"
+        "ebichan/silex-amqp-provider": "^1.0",
+        "predis/service-provider": "^1.0"
     },
     "require-dev": {
         "heroku/heroku-buildpack-php": "*"

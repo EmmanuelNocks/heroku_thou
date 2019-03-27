@@ -6,26 +6,11 @@ require_once dirname(__FILE__).'/Thou.php';
 require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 $app = new Silex\Application();
-$rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
-$app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
-    'amqp.connections' => [
-        'default' => [
-            'host'     => $rabbitmq['host'],
-            'port'     => isset($rabbitmq['port']) ? $rabbitmq['port'] : 5672,
-            'username' => $rabbitmq['user'],
-            'password' => $rabbitmq['pass'],
-            'vhost'    => substr($rabbitmq['path'], 1) ?: '/',
-        ],
-    ],
+$app->register(new Predis\Silex\ClientServiceProvider(), [
+    'predis.parameters' => getenv('REDIS_URL'),
 ]);
-        $connection = $app['amqp']['default'];
-        $channel = $connection->channel();
-// $connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
-// $channel = $connection->channel();
-$channel->queue_declare('task_queue', false, true, false, false);
-echo " [*] Waiting for messages. To exit press CTRL+C\n";
-$callback = function ($msg) {
-    
+
+try{
     $T2 = date("Y-m-d h:i:s");
     $T1 = date('Y-m-d H:i:s',strtotime('-10 minutes',strtotime($T2)));
     $datetime1 =  explode(" ",$T1);
@@ -37,25 +22,38 @@ $callback = function ($msg) {
     $date2 = implode("",explode("-",$datetime2[0]));
     $time2 = implode("",explode(":",$datetime2[1]));
     $datetime2 =$datetime2[0]."T".$datetime2[1];
+    $app['predis']->set('created_before',$$datetime2);
+    echo $app['predis']->get('created_before');
+    $rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
+    $app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
+        'amqp.connections' => [
+            'default' => [
+                'host'     => $rabbitmq['host'],
+                'port'     => isset($rabbitmq['port']) ? $rabbitmq['port'] : 5672,
+                'username' => $rabbitmq['user'],
+                'password' => $rabbitmq['pass'],
+                'vhost'    => substr($rabbitmq['path'], 1) ?: '/',
+            ],
+        ],
+    ]);
 
-    $instance = new Thou();
-    $data = $instance->getProspects($datetime1,$datetime2);
+        $connection = $app['amqp']['default'];
+        $channel = $connection->channel();
+
+        $channel->queue_declare('task_queue', false, true, false, false);
+        $msg = new AMQPMessage($datetime1.";".$datetime2, array('delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
+        $channel->basic_publish($msg, '', 'task_queue');
+        echo " [x] Sent'\n";
+        $channel->close();
+        $connection->close();
+    
 
 
-    foreach ($data as $key => $value) {
-        $instance-> lookUpProspect($value->id, $value->email);
-    }
-    $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-};
-$channel->basic_qos(null, 1, null);
-$channel->basic_consume('task_queue', '', false, false, false, false, $callback);
-while (count($channel->callbacks)) {
-    $channel->wait();
 }
-$channel->close();
-$connection->close();
+catch(Exeption $e){
 
-
+    print_r($e);
+}
 // $T2 = date("Y-m-d h:i:s");
 // $T1 = date('Y-m-d H:i:s',strtotime('-10 minutes',strtotime($T2)));
 // $datetime1 =  explode(" ",$T1);

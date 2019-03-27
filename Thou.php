@@ -313,7 +313,7 @@ try{
         $channel = $connection->channel();
 
         $channel->queue_declare('post_queue', false, true, false, false);
-        $msg = new AMQPMessage($_POST["pardotid"].";".$_POST["email"]);
+        $msg = new AMQPMessage($_POST["pardotid"].";".$_POST["email"], array('delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
         $channel->basic_publish($msg, '', 'post_queue');
         echo " [x] Sent'\n";
         $channel->close();

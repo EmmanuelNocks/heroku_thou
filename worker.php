@@ -18,11 +18,14 @@ $app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
         ],
     ],
 ]);
-        $connection = $app['amqp']['default'];
-        $channel = $connection->channel();
+
+
+$connection = $app['amqp']['default'];
+$channel = $connection->channel();
 // $connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
 // $channel = $connection->channel();
 $channel->queue_declare('post_queue', false, true, false, false);
+$channel->queue_declare('task_queue', false, true, false, false);
 echo " [*] Waiting for messages. To exit press CTRL+C\n";
 $callback = function ($msg) {
     echo " received\n";
@@ -33,9 +36,21 @@ $callback = function ($msg) {
 
     $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
 };
+$getProspects = function ($msg) {
+    echo " received\n";
+    $instance = new Thou();
+    $data = $instance->getProspects($datetime1,$datetime2);
+
+
+    foreach ($data as $key => $value) {
+        $instance-> lookUpProspect($value->id, $value->email);
+    }
+    $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+};
 $channel->basic_qos(null, 1, null);
 $channel->basic_consume('post_queue', '', false, false, false, false, $callback);
-while (count($channel->callbacks)) {
+$channel->basic_consume('task_queue', '', false, false, false, false, $getProspects);
+while (count($channel->callbacks)||count($channel->getProspects)) {
     $channel->wait();
 }
 $channel->close();
