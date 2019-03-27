@@ -315,15 +315,21 @@ try{
             ],
         ],
     ]);
-            $connection = $app['amqp']['default'];
-            $channel = $connection->channel();
+    if(isset($_POST["pardotid"]) && isset($_POST["email"])){
 
-$channel->queue_declare('task_queue', false, true, false, false);
-$msg = new AMQPMessage('Hello World!');
-$channel->basic_publish($msg, '', 'task_queue');
-echo " [x] Sent 'Hello World!'\n";
-$channel->close();
-$connection->close();
+        $postData = "{'id':'".$_POST["pardotid"]."','email':'".$_POST["email"]."'}";
+        $connection = $app['amqp']['default'];
+        $channel = $connection->channel();
+
+        $channel->queue_declare('post_queue', false, true, false, false);
+        $msg = new AMQPMessage($postData);
+        $channel->basic_publish($msg, '', 'post_queue');
+        echo " [x] Sent'\n";
+        $channel->close();
+        $connection->close();
+    }
+
+
 }
 catch(Exeption $e){
 
