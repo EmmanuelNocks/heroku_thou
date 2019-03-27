@@ -23,6 +23,7 @@ try{
     $date2 = implode("",explode("-",$datetime2[0]));
     $time2 = implode("",explode(":",$datetime2[1]));
     $datetime2 =$datetime2[0]."T".$datetime2[1];
+    echo $app['predis']->get('created_before');
     $app['predis']->set('created_before',$datetime2);
     echo $app['predis']->get('created_before');
     $rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
