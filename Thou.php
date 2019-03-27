@@ -75,25 +75,17 @@ class Thou{
     }
 
 
-    public function post(){
+    public function post($data){
         global $config;
        
-        if((isset($_POST["pardotid"]) && isset($_POST["email"]))||(isset($_GET["pardotid"]) && isset($_GET["email"]))){
+        if(count($data)>0){
         
-            if(isset($_GET["pardotid"]) && isset($_GET["email"])){
-                
-                $pID = $_GET["pardotid"];
-                $email = array($_GET["email"]);
-                $plainEmail = $_GET["email"];
+            
+                $pID = $data[0];
+                $email = array($data[1]);
+                $plainEmail = $data[0];
                 $domain = explode('@',$plainEmail);
-            }
-            else{
-
-                $pID = $_POST["pardotid"];
-                $email = array($_POST["email"]);
-                $plainEmail = $_POST["email"];
-                $domain = explode('@',$plainEmail);
-            }
+            
 
        
 

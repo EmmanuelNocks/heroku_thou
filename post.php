@@ -26,13 +26,11 @@ $channel->queue_declare('post_queue', false, true, false, false);
 echo " [*] Waiting for messages. To exit press CTRL+C\n";
 $callback = function ($msg) {
     echo " received\n";
-   echo $msg->body;
-   $postdata = explode(";",$msg->body);
-   echo $postdata[1];
-//    $postdata =  json_decode($msg->body,false);
-//     print($postdata);
-// $instance = new Thou();
-// $instance->post();
+ 
+    $postdata = explode(";",$msg->body);
+    $instance = new Thou();
+    $instance->post($postdata);
+
     $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
 };
 $channel->basic_qos(null, 1, null);
