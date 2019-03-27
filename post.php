@@ -27,7 +27,7 @@ echo " [*] Waiting for messages. To exit press CTRL+C\n";
 $callback = function ($msg) {
 
    $postdata =  json_decode($msg->body,false);
-    echo $postdata->email;
+    print($postdata);
 // $instance = new Thou();
 // $instance->post();
     $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
