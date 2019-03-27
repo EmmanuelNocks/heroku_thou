@@ -5,6 +5,7 @@ set_time_limit(0);
 require_once dirname(__FILE__).'/Thou.php';
 require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Message\AMQPMessage;
 $app = new Silex\Application();
 $app->register(new Predis\Silex\ClientServiceProvider(), [
     'predis.parameters' => getenv('REDIS_URL'),
