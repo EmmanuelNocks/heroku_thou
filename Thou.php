@@ -319,6 +319,17 @@ try{
         $channel->close();
         $connection->close();
     }
+    elseif (isset($_GET["pardotid"]) && isset($_GET["email"])) {
+        $connection = $app['amqp']['default'];
+        $channel = $connection->channel();
+
+        $channel->queue_declare('post_queue', false, true, false, false);
+        $msg = new AMQPMessage($_GET["pardotid"].";".$_GET["email"], array('delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
+        $channel->basic_publish($msg, '', 'post_queue');
+        echo " [x] Sent'\n";
+        $channel->close();
+        $connection->close();
+    }
 
 
 }

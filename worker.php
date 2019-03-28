@@ -23,8 +23,7 @@ $app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
 
 $connection = $app['amqp']['default'];
 $channel = $connection->channel();
-// $connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
-// $channel = $connection->channel();
+
 $channel->queue_declare('post_queue', false, true, false, false);
 $channel->queue_declare('task_queue', false, true, false, false);
 echo " [*] Waiting for messages. To exit press CTRL+C\n";
