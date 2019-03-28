@@ -108,7 +108,7 @@ class Thou{
             }
             else{
               
-                sleep(15); //retry
+                sleep(20); //retry
                 $person =  $this->clearbit->searchPersonByEmail($plainEmail);
                 $company =  $this->clearbit->searchCompanyByDomain($domain[1]); 
 
