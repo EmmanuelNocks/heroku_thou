@@ -91,7 +91,7 @@ class Thou{
 
        $person = $this->discover->searchPersonByEmail($email);
        $company =  $this->discover->searchCompanyByDomain(array($domain[1]));
-  
+
        if(count($person)>0 && count($company)>0){
 
         $this->discoverCallback($pID,$company[0],$person[0],true);
@@ -200,9 +200,11 @@ public function discoverCallback($pID,$company,$person,$found){
         'DO_State'=>$person->location->stateProvinceRegion,
         'DO_Title'=>$person->title,
         'DO_City' =>$person->location->city,
-        'DO_Country' => $person->location->countryName
+        'DO_Country' => $person->location->countryName,
+        'api_key' =>$this->pardot->getApiKey(),
+        'user_key' => $config["pardot"]["user_key"]
     );
-
+// print_r($data);
     $results= $this->pardot->runUpdate($pID,$data);
 
     if($results['code']==200){
@@ -229,6 +231,7 @@ else{
 public function getProspects($t1,$t2){
     global $config;
     $data = array(
+        'Data_Enrichment_Complete'=>0,
         'created_after'=>$t1,
         'created_before'=>$t2,
         'api_key' =>$this->pardot->getApiKey(),
