@@ -77,7 +77,7 @@ class Thou{
 
     public function post($data){
         global $config;
-       
+       echo 'test';
         if(count($data)>0){
         
             

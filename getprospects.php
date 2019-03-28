@@ -2,6 +2,7 @@
 error_reporting(E_ERROR | E_PARSE);
 ini_set('memory_limit', '-1');
 set_time_limit(0);
+date_default_timezone_set("America/New_York");
 require_once dirname(__FILE__).'/Thou.php';
 require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPStreamConnection;
@@ -12,7 +13,7 @@ $app->register(new Predis\Silex\ClientServiceProvider(), [
 ]);
 
 try{
- 
+    $T2 = date("Y-m-d h:i:s");
     $datetime2 =  explode(" ",$T2);
     $date2 = implode("",explode("-",$datetime2[0]));
     $time2 = implode("",explode(":",$datetime2[1]));

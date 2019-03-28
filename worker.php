@@ -44,10 +44,15 @@ $getProspects = function ($msg) {
     $instance = new Thou();
     $data = $instance->getProspects($dateData[0],$dateData[1]);
 
-
-    foreach ($data as $key => $value) {
-        $instance-> lookUpProspect($value->id, $value->email);
+    if(count($data)>1){
+        foreach ($data as $key => $value) {
+            $instance->lookUpProspect($value->id, $value->email);
+        }
     }
+    elseif(count($data)==1){
+        $instance->lookUpProspect($data->id, $data->email);
+    }
+
     $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
 };
 
