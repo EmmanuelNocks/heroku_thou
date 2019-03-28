@@ -33,11 +33,9 @@ class Thou{
     }
 
     public function lookUpProspect($pID,$email){
-
-        $email = array($email);
         $plainEmail = $email;
+        $email = array($email);
         $domain = explode('@',$plainEmail);
-
         $person = $this->discover->searchPersonByEmail($email);
         $company =  $this->discover->searchCompanyByDomain(array($domain[1]));
 
@@ -50,14 +48,14 @@ class Thou{
  
              $person =  $this->clearbit->searchPersonByEmail($plainEmail);
              $company =  $this->clearbit->searchCompanyByDomain($domain[1]); 
- 
+
              if(!isset($person->error)&&!isset($company->error)){
              
                  $this->clearbitCallback($pID,$company,$person,true);
              }
              else{
                
-                 sleep(15); //retry
+                 sleep(5); //retry
                  $person =  $this->clearbit->searchPersonByEmail($plainEmail);
                  $company =  $this->clearbit->searchCompanyByDomain($domain[1]); 
  
@@ -108,7 +106,7 @@ class Thou{
             }
             else{
               
-                sleep(15); //retry
+                sleep(5); //retry
                 $person =  $this->clearbit->searchPersonByEmail($plainEmail);
                 $company =  $this->clearbit->searchCompanyByDomain($domain[1]); 
 
