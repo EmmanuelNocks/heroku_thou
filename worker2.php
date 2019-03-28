@@ -23,21 +23,27 @@ $app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
 
 $connection = $app['amqp']['default'];
 $channel = $connection->channel();
-
-$channel->queue_declare('post_queue', false, true, false, false);
+$channel->queue_declare('task_queue', false, true, false, false);
 echo " [*] Waiting for messages. To exit press CTRL+C\n";
 $callback = function ($msg) {
     echo " received\n";
- 
-    $postdata = explode(";",$msg->body);
+    $dateData = explode(";",$msg->body);
     $instance = new Thou();
-    $instance->post($postdata);
+    $data = $instance->getProspects($dateData[0],$dateData[1]);
+
+    if(count($data)>1){
+        foreach ($data as $key => $value) {
+            $instance->lookUpProspect($value->id, $value->email);
+        }
+    }
+    elseif(count($data)==1){
+        $instance->lookUpProspect($data->id, $data->email);
+    }
 
     $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
 };
-
 $channel->basic_qos(null, 1, null);
-$channel->basic_consume('post_queue', '', false, false, false, false, $callback);
+$channel->basic_consume('task_queue', '', false, false, false, false, $callback);
 while (count($channel->callbacks)) {
     $channel->wait();
 }

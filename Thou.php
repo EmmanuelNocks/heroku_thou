@@ -91,7 +91,7 @@ class Thou{
 
        $person = $this->discover->searchPersonByEmail($email);
        $company =  $this->discover->searchCompanyByDomain(array($domain[1]));
-       echo count($company);
+  
        if(count($person)>0 && count($company)>0){
 
         $this->discoverCallback($pID,$company[0],$person[0],true);
