@@ -31,6 +31,7 @@ $callback = function ($msg) {
     echo " received\n";
  
     $postdata = explode(";",$msg->body);
+    echo $msg->body;
     $instance = new Thou();
     $instance->post($postdata);
 
