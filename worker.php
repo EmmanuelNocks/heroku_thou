@@ -31,7 +31,6 @@ $callback = function ($msg) {
     echo " received\n";
  
     $postdata = explode(";",$msg->body);
-    echo $msg->body;
     $instance = new Thou();
     $instance->post($postdata);
 
@@ -39,28 +38,28 @@ $callback = function ($msg) {
 };
 
 
-$getProspects = function ($msg) {
-    echo " received\n";
-    $dateData = explode(";",$msg->body);
-    $instance = new Thou();
-    $data = $instance->getProspects($dateData[0],$dateData[1]);
+// $getProspects = function ($msg) {
+//     echo " received\n";
+//     $dateData = explode(";",$msg->body);
+//     $instance = new Thou();
+//     $data = $instance->getProspects($dateData[0],$dateData[1]);
 
-    if(count($data)>1){
-        foreach ($data as $key => $value) {
-            $instance->lookUpProspect($value->id, $value->email);
-        }
-    }
-    elseif(count($data)==1){
-        $instance->lookUpProspect($data->id, $data->email);
-    }
+//     if(count($data)>1){
+//         foreach ($data as $key => $value) {
+//             $instance->lookUpProspect($value->id, $value->email);
+//         }
+//     }
+//     elseif(count($data)==1){
+//         $instance->lookUpProspect($data->id, $data->email);
+//     }
 
-    $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-};
+//     $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+// };
 
 $channel->basic_qos(null, 1, null);
 $channel->basic_consume('post_queue', '', false, false, false, false, $callback);
-$channel->basic_consume('task_queue', '', false, false, false, false, $getProspects);
-while (count($channel->callbacks)||count($channel->getProspects)) {
+//$channel->basic_consume('task_queue', '', false, false, false, false, $getProspects);
+while (count($channel->callbacks)) {
     $channel->wait();
 }
 $channel->close();

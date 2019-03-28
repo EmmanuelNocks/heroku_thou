@@ -80,9 +80,9 @@ class Thou{
         if(count($data)>0){
         
             
-                $pID = $data[0];
-                $email = array($data[1]);
-                $plainEmail = $data[1];
+                $pID = trim($data[0]);
+                $email = array(trim($data[1]));
+                $plainEmail = trim($data[1]);
                 $domain = explode('@',$plainEmail);
             
 
@@ -91,6 +91,7 @@ class Thou{
 
        $person = $this->discover->searchPersonByEmail($email);
        $company =  $this->discover->searchCompanyByDomain(array($domain[1]));
+       echo count($company);
        if(count($person)>0 && count($company)>0){
 
         $this->discoverCallback($pID,$company[0],$person[0],true);
