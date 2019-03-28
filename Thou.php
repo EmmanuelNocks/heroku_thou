@@ -293,47 +293,47 @@ public function createProspects(){
 //         ],
 //     ],
 // ]);
-// try{
-//     $rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
-//     $app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
-//         'amqp.connections' => [
-//             'default' => [
-//                 'host'     => $rabbitmq['host'],
-//                 'port'     => isset($rabbitmq['port']) ? $rabbitmq['port'] : 5672,
-//                 'username' => $rabbitmq['user'],
-//                 'password' => $rabbitmq['pass'],
-//                 'vhost'    => substr($rabbitmq['path'], 1) ?: '/',
-//             ],
-//         ],
-//     ]);
-//     if(isset($_POST["pardotid"]) && isset($_POST["email"])){
+try{
+    $rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
+    $app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
+        'amqp.connections' => [
+            'default' => [
+                'host'     => $rabbitmq['host'],
+                'port'     => isset($rabbitmq['port']) ? $rabbitmq['port'] : 5672,
+                'username' => $rabbitmq['user'],
+                'password' => $rabbitmq['pass'],
+                'vhost'    => substr($rabbitmq['path'], 1) ?: '/',
+            ],
+        ],
+    ]);
+    if(isset($_POST["pardotid"]) && isset($_POST["email"])){
 
-//         $connection = $app['amqp']['default'];
-//         $channel = $connection->channel();
+        $connection = $app['amqp']['default'];
+        $channel = $connection->channel();
 
-//         $channel->queue_declare('post_queue', false, true, false, false);
-//         $msg = new AMQPMessage($_POST["pardotid"].";".$_POST["email"], array('delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
-//         $channel->basic_publish($msg, '', 'post_queue');
-//         echo " [x] Sent'\n";
-//         $channel->close();
-//         $connection->close();
-//     }
-//     elseif (isset($_GET["pardotid"]) && isset($_GET["email"])) {
-//         $connection = $app['amqp']['default'];
-//         $channel = $connection->channel();
+        $channel->queue_declare('post_queue', false, true, false, false);
+        $msg = new AMQPMessage($_POST["pardotid"].";".$_POST["email"], array('delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
+        $channel->basic_publish($msg, '', 'post_queue');
+        echo " [x] Sent'\n";
+        $channel->close();
+        $connection->close();
+    }
+    elseif (isset($_GET["pardotid"]) && isset($_GET["email"])) {
+        $connection = $app['amqp']['default'];
+        $channel = $connection->channel();
 
-//         $channel->queue_declare('post_queue', false, true, false, false);
-//         $msg = new AMQPMessage($_GET["pardotid"].";".$_GET["email"], array('delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
-//         $channel->basic_publish($msg, '', 'post_queue');
-//         echo " [x] Sent'\n";
-//         $channel->close();
-//         $connection->close();
-//     }
+        $channel->queue_declare('post_queue', false, true, false, false);
+        $msg = new AMQPMessage($_GET["pardotid"].";".$_GET["email"], array('delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
+        $channel->basic_publish($msg, '', 'post_queue');
+        echo " [x] Sent'\n";
+        $channel->close();
+        $connection->close();
+    }
 
 
-// }
-// catch(Exeption $e){
+}
+catch(Exeption $e){
 
-//     print_r($e);
-// }
+    print_r($e);
+}
 ?>
