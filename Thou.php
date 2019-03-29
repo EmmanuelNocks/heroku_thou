@@ -33,197 +33,344 @@ class Thou{
     }
 
     public function lookUpProspect($pID,$email){
+        global $config;
         $plainEmail = $email;
         $email = array($email);
         $domain = explode('@',$plainEmail);
         $person = $this->discover->searchPersonByEmail($email);
         $company =  $this->discover->searchCompanyByDomain(array($domain[1]));
+        $allData = array();
+        $keys = array(
+            'Data_Enrichment_Complete'=>true,
+            'api_key' =>$this->pardot->getApiKey(),
+            'user_key' => $config["pardot"]["user_key"],
+            'format'=>'json'
+        );
 
-        if(count($person)>0 && count($company)>0){
- 
-         $this->discoverCallback($pID,$company[0],$person[0],true);
-            
+       $discoverdata =  $this->discoverCallback($pID,$company,$person);
+
+       if(count($discoverdata)>0){
+
+        $person1 =  $this->clearbit->searchPersonByEmail($plainEmail);
+        $company1 =  $this->clearbit->searchCompanyByDomain($domain[1]); 
+
+        if(!isset($person1->error)&&!isset($company1->error)){
+
+            $clearbitData = $this->clearbitCallback($pID,$company1,$person1);
         }
         else{
- 
-             $person =  $this->clearbit->searchPersonByEmail($plainEmail);
-             $company =  $this->clearbit->searchCompanyByDomain($domain[1]); 
 
-             if(!isset($person->error)&&!isset($company->error)){
-             
-                 $this->clearbitCallback($pID,$company,$person,true);
-             }
-             else{
-               
-                 sleep(5); //retry
-                 $person =  $this->clearbit->searchPersonByEmail($plainEmail);
-                 $company =  $this->clearbit->searchCompanyByDomain($domain[1]); 
- 
-                 if(!isset($person->error)&&!isset($company->error)){
-                     $this->clearbitCallback($pID,$company,$person,true);
-                 }
-                 else{
-                     $this->clearbitCallback($pID,$company,$person,false);
-                 }
- 
-             }
- 
- 
-        } 
+            sleep(5); //retry
+            $person1 =  $this->clearbit->searchPersonByEmail($plainEmail);
+            $company1 =  $this->clearbit->searchCompanyByDomain($domain[1]); 
+
+            $clearbitData = $this->clearbitCallback($pID,$company1,$person1);
+
+        }
+
+
+       }
+       else{
+
+        $person1 =  $this->clearbit->searchPersonByEmail($plainEmail);
+        $company1 =  $this->clearbit->searchCompanyByDomain($domain[1]); 
+
+        if(!isset($person1->error)&&!isset($company1->error)){
+
+            $clearbitData = $this->clearbitCallback($pID,$company1,$person1);
+        }
+        else{
+
+            sleep(5); //retry
+            $person1 =  $this->clearbit->searchPersonByEmail($plainEmail);
+            $company1 =  $this->clearbit->searchCompanyByDomain($domain[1]); 
+
+            $clearbitData = $this->clearbitCallback($pID,$company1,$person1);
+
+        }
+
+       }
+
+       if(count($clearbitData)>0||count($discoverdata)>0){
+
+        $allData = array_merge($clearbitData,$discoverdata,$keys);
+        $results= $this->pardot->runUpdate($pID,$allData);
+       
+        if($results['code']==200){
+            echo 'Successful \n';
+        }
+        else{
+            echo $results['res']->err;
+        }
+        }
+        else{
+
+            $data = array(
+                'Data_Enrichment_Complete'=>true,
+                'api_key' =>$this->pardot->getApiKey(),
+                'user_key' => $config["pardot"]["user_key"],
+                'format'=>'json'
+            );
+    
+            $results= $this->pardot->runUpdate($pID,$data);
+
+            if($results['code']==200){
+                echo 'Successful , but data not found';
+            }
+            else{
+                echo $results['res']->err;
+            }
+
+        }
+        
     }
 
 
     public function post($data){
         global $config;
         if(count($data)>0){
-        
-            
+                
                 $pID = trim($data[0]);
                 $email = array(trim($data[1]));
                 $plainEmail = trim($data[1]);
                 $domain = explode('@',$plainEmail);
-            
-
-       
-
-
-       $person = $this->discover->searchPersonByEmail($email);
-       $company =  $this->discover->searchCompanyByDomain(array($domain[1]));
-
-       if(count($person)>0 && count($company)>0){
-
-        $this->discoverCallback($pID,$company[0],$person[0],true);
-           
-       }
-       else{
-
-            $person =  $this->clearbit->searchPersonByEmail($plainEmail);
-            $company =  $this->clearbit->searchCompanyByDomain($domain[1]); 
-
-            if(!isset($person->error)&&!isset($company->error)){
-            
-                $this->clearbitCallback($pID,$company,$person,true);
-            }
-            else{
-              
-                sleep(5); //retry
-                $person =  $this->clearbit->searchPersonByEmail($plainEmail);
-                $company =  $this->clearbit->searchCompanyByDomain($domain[1]); 
-
-                if(!isset($person->error)&&!isset($company->error)){
-                    $this->clearbitCallback($pID,$company,$person,true);
+                $person = $this->discover->searchPersonByEmail($email);
+                $company =  $this->discover->searchCompanyByDomain(array($domain[1]));
+                $allData = array();
+                $keys = array(
+                    'Data_Enrichment_Complete'=>true,
+                    'api_key' =>$this->pardot->getApiKey(),
+                    'user_key' => $config["pardot"]["user_key"],
+                    'format'=>'json'
+                );
+        
+               $discoverdata =  $this->discoverCallback($pID,$company,$person);
+        
+               if(count($discoverdata)>0){
+        
+                $person1 =  $this->clearbit->searchPersonByEmail($plainEmail);
+                $company1 =  $this->clearbit->searchCompanyByDomain($domain[1]); 
+        
+                if(!isset($person1->error)&&!isset($company1->error)){
+        
+                    $clearbitData = $this->clearbitCallback($pID,$company1,$person1);
                 }
                 else{
-                    $this->clearbitCallback($pID,$company,$person,false);
+        
+                    sleep(5); //retry
+                    $person1 =  $this->clearbit->searchPersonByEmail($plainEmail);
+                    $company1 =  $this->clearbit->searchCompanyByDomain($domain[1]); 
+        
+                    $clearbitData = $this->clearbitCallback($pID,$company1,$person1);
+        
                 }
-
-            }
-
-
-       }
+        
+        
+               }
+               else{
+        
+                $person1 =  $this->clearbit->searchPersonByEmail($plainEmail);
+                $company1 =  $this->clearbit->searchCompanyByDomain($domain[1]); 
+        
+                if(!isset($person1->error)&&!isset($company1->error)){
+        
+                    $clearbitData = $this->clearbitCallback($pID,$company1,$person1);
+                }
+                else{
+        
+                    sleep(5); //retry
+                    $person1 =  $this->clearbit->searchPersonByEmail($plainEmail);
+                    $company1 =  $this->clearbit->searchCompanyByDomain($domain[1]); 
+        
+                    $clearbitData = $this->clearbitCallback($pID,$company1,$person1);
+        
+                }
+        
+               }
+        
+               if(count($clearbitData)>0||count($discoverdata)>0){
+       
+                $allData = array_merge($clearbitData,$discoverdata,$keys);
+               
+                $results= $this->pardot->runUpdate($pID,$allData);
+              
+                if($results['code']==200){
+                    echo 'Successful \n';
+                }
+                else{
+                    echo $results['res']->err;
+                }
+                }
+                else{
+        
+                    $data = array(
+                        'Data_Enrichment_Complete'=>true,
+                        'api_key' =>$this->pardot->getApiKey(),
+                        'user_key' => $config["pardot"]["user_key"],
+                        'format'=>'json'
+                    );
+            
+                    $results= $this->pardot->runUpdate($pID,$data);
+        
+                    if($results['code']==200){
+                        echo 'Successful, but data not found\n';
+                    }
+                    else{
+                        echo $results['res']->err;
+                    }
+                }
+                
 
 
     }
 }
 
-public function clearbitCallback($pID,$company,$person,$found){
+public function clearbitCallback($pID,$company,$person){
     global $config;
+    $foud=false;
+    if(!isset($company->error)&&!isset($person->error)){
+
+        $found =true;
+        $data = array(
+            'clearbitCompanyLogo'=>$company->logo,
+            'Clearbit_State'=>$person->geo->state,
+            'Clearbit_Country'=>$person->geo->country,
+            'Clearbit_Title'=>$person->employment->title,
+            'Clearbit_Phone'=>count($company->phone->site->phoneNumbers)>0?$company->phone->site->phoneNumbers[0]:null,
+            'Clearbit_HQ_Street_Number'=>$company->geo->streetNumber,
+            'Clearbit_HQ_Street_Name'=>$company->geo->streetName,
+            'Clearbit_HQ_State'=>$company->geo->state,
+            'Clearbit_HQ_Zip_Code'=>$company->geo->postalCode,
+            'Clearbit_HQ_Country'=>$company->geo->country,
+            'Clearbit_HQ_City'=>$company->geo->city,
+            'Clearbit_Industry'=>$company->category->industry
+        );
+
+    }
+    else{
+
+        if(!isset($company->error)){
+
+            $found =true;
+            $data = array(
+                'clearbitCompanyLogo'=>$company->logo,
+                'Clearbit_Phone'=>count($company->phone->site->phoneNumbers)>0?$company->phone->site->phoneNumbers[0]:null,
+                'Clearbit_HQ_Street_Number'=>$company->geo->streetNumber,
+                'Clearbit_HQ_Street_Name'=>$company->geo->streetName,
+                'Clearbit_HQ_State'=>$company->geo->state,
+                'Clearbit_HQ_Zip_Code'=>$company->geo->postalCode,
+                'Clearbit_HQ_Country'=>$company->geo->country,
+                'Clearbit_HQ_City'=>$company->geo->city,
+                'Clearbit_Industry'=>$company->category->industry
+            );
+        }
+        elseif(!isset($person->error)){
+
+            $found =true;
+            $data = array(
+                'Clearbit_State'=>$person->geo->state,
+                'Clearbit_Country'=>$person->geo->country,
+                'Clearbit_Title'=>$person->employment->title
+            );
+        }
+        else{
+            $found =false;
+        }
+    }
 
     if($found){
-    $data = array(
-        'Data_Enrichment_Complete'=>true,
-        'clearbitCompanyLogo'=>$company->logo,
-        'Clearbit_State'=>$person->geo->state,
-        'Clearbit_Country'=>$person->geo->country,
-        'Clearbit_Title'=>$person->employment->title,
-        'Clearbit_Phone'=>count($company->phone->site->phoneNumbers)>0?$company->phone->site->phoneNumbers[0]:null,
-        'Clearbit_HQ_Street_Number'=>$company->geo->streetNumber,
-        'Clearbit_HQ_Street_Name'=>$company->geo->streetName,
-        'Clearbit_HQ_State'=>$company->geo->state,
-        'Clearbit_HQ_Zip_Code'=>$company->geo->postalCode,
-        'Clearbit_HQ_Country'=>$company->geo->country,
-        'Clearbit_HQ_City'=>$company->geo->city,
-        'Clearbit_Industry'=>$company->category->industry,
-        'api_key' =>$this->pardot->getApiKey(),
-        'user_key' => $config["pardot"]["user_key"],
-        'format'=>'json'
-    );
-
-    $results= $this->pardot->runUpdate($pID,$data);
-
-    if($results['code']==200){
-        echo 'Successful';
+        return $data;
     }
-}
-else{
+    else{
 
-    $data = array(
-        'Data_Enrichment_Complete'=>true,
-        'api_key' =>$this->pardot->getApiKey(),
-        'user_key' => $config["pardot"]["user_key"],
-        'format'=>'json'
-    );
+    return array();
 
-    $results= $this->pardot->runUpdate($pID,$data);
-
-    if($results['code']==200){
-        echo 'Successful, but data not found';
     }
-}
 }
 
 //__________________________________________________________________________________________________________
-public function discoverCallback($pID,$company,$person,$found){
+public function discoverCallback($pID,$company){
     global $config;
+    $foud=false;
+        if(count($company)>0&&count($person)>0){
+            $company = $company[0];
+            $person = $person[0];
+            $found =true;
+            $data = array(
+                'Data_Enrichment_Complete'=>true,
+                'DO_Account_Address'=>$company->location->streetAddress1,
+                'DO_Account_City'=>$company->location->city,
+                'DO_Account_Country'=>$company->location->countryName,
+                'DO_Employees__c_lead'=>'',
+                'DO_Industry'=>$company->industry,
+                'DO_Company'=>$company->name,
+                'DO_Account_Phone'=>$company->mainPhoneNumber,
+                'DO_Revenue'=>$company->revenue,
+                'DO_Account_State'=>$company->location->stateProvinceRegion,
+                'DO_Website'=>$company->websiteUrl,
+                'DO_Account_Zip_Code'=>$person->location->postalCode,
+                'DO_Address'=>$person->location->streetAddress1,
+                'DSCORGPKG_DiscoverOrg_ID'=>$person->id,
+                'DO_MobilePhone'=>$person->officeTelNumber,
+                'DO_Phone'=>$company->mainPhoneNumber,
+                'DO_State'=>$person->location->stateProvinceRegion,
+                'DO_Title'=>$person->title,
+                'DO_City' =>$person->location->city,
+                'DO_Country' => $person->location->countryName
+            );
+        }
+        else{
 
-    if($found){
+            if(count($company)>0){
+                $company = $company[0];
+                $found =true;
+                $data = array(
+                    'Data_Enrichment_Complete'=>true,
+                    'DO_Account_Address'=>$company->location->streetAddress1,
+                    'DO_Account_City'=>$company->location->city,
+                    'DO_Account_Country'=>$company->location->countryName,
+                    'DO_Employees__c_lead'=>'',
+                    'DO_Industry'=>$company->industry,
+                    'DO_Company'=>$company->name,
+                    'DO_Account_Phone'=>$company->mainPhoneNumber,
+                    'DO_Revenue'=>$company->revenue,
+                    'DO_Account_State'=>$company->location->stateProvinceRegion,
+                    'DO_Website'=>$company->websiteUrl,
+                    'DO_Phone'=>$company->mainPhoneNumber
+                );
+            }
+            elseif(count($person)>0){
+                $person = $person[0];
+                $found =true;
+                $data = array(
+                    'Data_Enrichment_Complete'=>true,
+                    'DO_Employees__c_lead'=>'',
+                    'DO_Account_Zip_Code'=>$person->location->postalCode,
+                    'DO_Address'=>$person->location->streetAddress1,
+                    'DSCORGPKG_DiscoverOrg_ID'=>$person->id,
+                    'DO_MobilePhone'=>$person->officeTelNumber,
+                    'DO_State'=>$person->location->stateProvinceRegion,
+                    'DO_Title'=>$person->title,
+                    'DO_City' =>$person->location->city,
+                    'DO_Country' => $person->location->countryName
+                );
+            }
+            else{
+                $found =false;
+            }
+        }
 
-    $data = array(
-        'Data_Enrichment_Complete'=>true,
-        'DO_Account_Address'=>$company->location->streetAddress1,
-        'DO_Account_City'=>$company->location->city,
-        'DO_Account_Country'=>$company->location->countryName,
-        'DO_Employees__c_lead'=>'',
-        'DO_Industry'=>$company->industry,
-        'DO_Company'=>$company->name,
-        'DO_Account_Phone'=>$company->mainPhoneNumber,
-        'DO_Revenue'=>$company->revenue,
-        'DO_Account_State'=>$company->location->stateProvinceRegion,
-        'DO_Website'=>$company->websiteUrl,
-        'DO_Account_Zip_Code'=>$person->location->postalCode,
-        'DO_Address'=>$person->location->streetAddress1,
-        'DSCORGPKG_DiscoverOrg_ID'=>$person->id,
-        'DO_MobilePhone'=>$person->officeTelNumber,
-        'DO_Phone'=>$company->mainPhoneNumber,
-        'DO_State'=>$person->location->stateProvinceRegion,
-        'DO_Title'=>$person->title,
-        'DO_City' =>$person->location->city,
-        'DO_Country' => $person->location->countryName,
-        'api_key' =>$this->pardot->getApiKey(),
-        'user_key' => $config["pardot"]["user_key"]
-    );
-// print_r($data);
-    $results= $this->pardot->runUpdate($pID,$data);
 
-    if($results['code']==200){
-        echo 'Successful';
-    }
-}
-else{
 
-    $data = array(
-        'Data_Enrichment_Complete'=>true,
-        'api_key' =>$this->pardot->getApiKey(),
-        'user_key' => $config["pardot"]["user_key"],
-        'format'=>'json'
-    );
+        if($found){
 
-    $results= $this->pardot->runUpdate($pID,$data);
+        return $data;
 
-    if($results['code']==200){
-        echo 'Successful, but data not found';
-    }
-}
+        }
+        else{
+            
+            return array();
+        }
 }
 
 public function getProspects($t1,$t2){
@@ -294,7 +441,7 @@ public function createProspects(){
 //             'vhost'    => substr($rabbitmq['path'], 1) ?: '/',
 //         ],
 //     ],
-// ]);
+//]);
 try{
     $rabbitmq = parse_url(getenv('CLOUDAMQP_URL'));
     $app->register(new Amqp\Silex\Provider\AmqpServiceProvider, [
