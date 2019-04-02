@@ -389,24 +389,29 @@ public function getProspects($t1,$t2){
  
     $results = $this->pardot->queryByDateTime($data)['res'];
     $toatresults = $results->result->prospect;
+    $offset =200;
 
-    while($results->result->total_results==200 && $results->result->total_results!=1){
-
+    while(count($results->result->prospect)){
+       
         $data = array(
-            'created_after'=>$results->result->prospect[$results->result->total_results-1]->created_at,
+            'created_after'=>$t1,
             'created_before'=>$t2,
             'api_key' =>$this->pardot->getApiKey(),
             'user_key' => $config["pardot"]["user_key"],
-            'format'=>'json'
+            'format'=>'json',
+            'offset'=>$offset
         );
-        
+
         $results = $this->pardot->queryByDateTime($data)['res'];
-       
-        if($results->result->total_results>0){
+
+        if(count($results->result->prospect)!=0)
+        {
             $toatresults = array_merge($toatresults,$results->result->prospect);
         }
+
+        $offset =  $offset +200;
     }
-    
+    ;
    return $toatresults;
 }
 
