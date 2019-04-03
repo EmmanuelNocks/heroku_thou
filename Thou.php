@@ -7,7 +7,7 @@ require_once dirname(__FILE__).'/Discover.php';
 require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
-date_default_timezone_set("America/New_York");
+
 $app = new Silex\Application();
 class Thou{
 
