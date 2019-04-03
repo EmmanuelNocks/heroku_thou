@@ -46,7 +46,7 @@ try{
     $dateData = explode(";","2019-04-03T01:00:28;2019-04-03T02:00:28;");
     $instance = new Thou();
     $data = $instance->getProspects($dateData[0],$dateData[1]);
-
+print_r($data);
     if(count($data)>1){
         foreach ($data as $key => $value) {
             $instance->lookUpProspect($value->id, $value->email);
