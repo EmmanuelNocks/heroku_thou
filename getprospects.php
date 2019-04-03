@@ -38,7 +38,7 @@ try{
     $channel = $connection->channel();
 
     $channel->queue_declare('task_queue', false, true, false, false);
-    $msg = new AMQPMessage($datetime1.";".$datetime2, array('delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
+    $msg = new AMQPMessage("2019-04-03T01:00:28;".$datetime2, array('delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
     $channel->basic_publish($msg, '', 'task_queue');
     echo " [x] Sent'\n";
     $channel->close();
