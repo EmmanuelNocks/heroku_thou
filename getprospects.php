@@ -14,7 +14,7 @@ $app->register(new Predis\Silex\ClientServiceProvider(), [
 
 try{
     $T2 = date("Y-m-d h:i:s");
-    print_r($T2);
+
     $datetime2 =  explode(" ",$T2);
     $date2 = implode("",explode("-",$datetime2[0]));
     $time2 = implode("",explode(":",$datetime2[1]));
@@ -33,7 +33,7 @@ try{
             ],
         ],
     ]);
-
+    print_r($datetime1."==".$datetime2);
     $connection = $app['amqp']['default'];
     $channel = $connection->channel();
 
