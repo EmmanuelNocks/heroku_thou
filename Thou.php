@@ -7,7 +7,7 @@ require_once dirname(__FILE__).'/Discover.php';
 require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
-date_default_timezone_set("America/Chicago");
+date_default_timezone_set("America/New_York");
 $app = new Silex\Application();
 class Thou{
 
@@ -381,16 +381,15 @@ public function getProspects($t1,$t2){
         'created_before'=>$t2,
         'api_key' =>$this->pardot->getApiKey(),
         'user_key' => $config["pardot"]["user_key"],
-        'sort_by'=>'created_at',
-        'sort_order'=>'ascending',
+        'sort_by'=>'id',
         'format'=>'json',
         'limit'=>'200'
     );
- 
+
     $results = $this->pardot->queryByDateTime($data)['res'];
     $toatresults = $results->result->prospect;
     $offset =200;
-
+    
     while(count($results->result->prospect)){
        
         $data = array(
@@ -411,7 +410,7 @@ public function getProspects($t1,$t2){
 
         $offset =  $offset +200;
     }
-    ;
+   
    return $toatresults;
 }
 
