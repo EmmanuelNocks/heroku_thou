@@ -50,19 +50,19 @@ try{
     $dateData = explode(";","2019-04-04T02:09:28;2019-04-04T02:56:28");
     $instance = new Thou();
     
-    // $data = $instance->getProspects($dateData[0],$dateData[1]);
+    $data = $instance->getProspects($dateData[0],$dateData[1]);
 
-    // if(count($data)>1){
-    //     foreach ($data as $key => $value) {
-    //         $instance->lookUpProspect($value->id, $value->email);
-    //         echo "Email ",$value->email, " \n";
-    //     }
-    // }
-    // elseif(count($data)==1){
-    //     $instance->lookUpProspect($data->id, $data->email);
-    // }
+    if(count($data)>1){
+        foreach ($data as $key => $value) {
+            $instance->lookUpProspect($value->id, $value->email);
+            echo "Email ",$value->email, " \n";
+        }
+    }
+    elseif(count($data)==1){
+        $instance->lookUpProspect($data->id, $data->email);
+    }
     // $instance = new Thou();
-     $instance->lookUpProspect('5244418', 'nagendra.krish@gmail.com');
+    // $instance->lookUpProspect('5244418', 'nagendra.krish@gmail.com');
 }
 catch(Exeption $e){
 
