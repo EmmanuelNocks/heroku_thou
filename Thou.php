@@ -97,7 +97,11 @@ class Thou{
         $results= $this->pardot->runUpdate($pID,$allData);
        
         if($results['code']==200){
-            echo 'Successful \n'.json_encode($results['res']);
+            if(isset($results['res']->err)){
+                $this->pardot = new Pardot();
+                $results= $this->pardot->runUpdate($pID,$allData);
+            }
+            echo 'Successful \n';
         }
         else{
             echo $results['res']->err;
@@ -115,7 +119,11 @@ class Thou{
             $results= $this->pardot->runUpdate($pID,$data);
 
             if($results['code']==200){
-                echo 'Successful , but data not found'.json_encode($results['res']);
+                if(isset($results['res']->err)){
+                    $this->pardot = new Pardot();
+                    $results= $this->pardot->runUpdate($pID,$allData);
+                }
+                echo 'Successful , but data not found';
             }
             else{
                 echo $results['res']->err;
