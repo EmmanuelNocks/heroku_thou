@@ -97,7 +97,7 @@ class Thou{
         $results= $this->pardot->runUpdate($pID,$allData);
        
         if($results['code']==200){
-            echo 'Successful \n';
+            echo 'Successful \n'.json_encode($results['res']);
         }
         else{
             echo $results['res']->err;
@@ -115,7 +115,7 @@ class Thou{
             $results= $this->pardot->runUpdate($pID,$data);
 
             if($results['code']==200){
-                echo 'Successful , but data not found';
+                echo 'Successful , but data not found'.json_encode($results['res']);
             }
             else{
                 echo $results['res']->err;
@@ -227,7 +227,7 @@ class Thou{
 
 public function clearbitCallback($pID,$company,$person){
     global $config;
-    $foud=false;
+    $found=false;
     if(!isset($company->error)&&!isset($person->error)){
 
         $found =true;
@@ -291,7 +291,7 @@ public function clearbitCallback($pID,$company,$person){
 //__________________________________________________________________________________________________________
 public function discoverCallback($pID,$company){
     global $config;
-    $foud=false;
+    $found=false;
         if(count($company)>0&&count($person)>0){
             $company = $company[0];
             $person = $person[0];
